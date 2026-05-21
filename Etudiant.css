@@ -1,0 +1,385 @@
+*{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial;
+        }
+
+        body{
+            background:#f4f6f9;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar{
+            position:fixed;
+            width:180px;
+            height:100vh;
+            background:#0d3b66;
+        }
+        .menu{
+            margin-top: 20px;
+        }
+        .sidebar a{
+            display:block;
+            color:white;
+            text-decoration:none;
+            padding:18px;
+            font-size:18px;
+        }
+        
+        .sidebar a:hover{
+            background:#144c8c;
+             border-radius: 30px;
+        }
+.sidebar img{
+    margin-top: 20px;
+    border: 4px solid white;
+    padding: 2px;
+    border-radius: 100px;
+    height: 120px;
+    width: 120px;
+    animation-name: mihodina;
+    animation-duration: 5s;
+    animation-delay: 2s;
+    animation-iteration-count: infinite;
+}
+
+/* .menu a:hover{
+    background: rgba(255,255,255,0.2);
+    transform: translateX(5px);
+    border-radius: 30px;
+} */
+
+
+@keyframes mihodina {
+    0% {
+        transform: rotateY(0deg);
+    }
+
+    100% {
+        transform: rotateY(360deg);
+    }
+}
+/* =========================
+   MAIN CONTAINER
+========================= */
+
+.Formulaire{
+    margin-left:185px;
+    width:90%;
+    padding:30px;
+}
+
+/* =========================
+   SEARCH
+========================= */
+
+.recherhe{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    flex-wrap:wrap;
+    background:white;
+    padding:7px 10px;
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom:10px;
+}
+ .titre{
+    height: 70px;
+    border-radius:12px;
+    background:white;
+    padding:7px 10px;
+    box-shadow:0 2px 20px rgba(0,0,0,0.05);
+    margin-bottom:10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+ }
+/* input recherche */
+.recherhe input{
+    flex:1;
+    min-width:250px;
+    padding:10px 13px;
+    border:none;
+    border-radius:10px;
+    outline:none;
+    background:#f8fafc;
+}
+
+/* bouton search */
+.btn-search{
+    background:#1d4ed8;
+    color:white;
+    border:none;
+    border-radius:10px;
+    width:42px;
+    height:42px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.btn-search:hover{
+        background:#0d3b66;
+}
+.btn-reset {
+     background:#1d4ed8;
+    color:white;
+    width:42px;
+    height:42px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    text-decoration: none;
+    transition:0.3s;
+}
+
+.btn-reset:hover{
+        background:#0d3b66;
+}
+/* =========================
+   TOOLS (TRI + FILTER)
+========================= */
+
+.tools{
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    margin-bottom:15px;
+    gap:20px;
+}
+
+.tri-box, .filter-box{
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+select{
+    padding:10px;
+    border-radius:10px;
+    border:1px solid #ddd;
+}
+
+/* =========================
+   FORM
+========================= */
+
+.formul{
+    background:white;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom:30px;
+    display:grid;
+    grid-template-columns: repeat(5,1fr);
+    gap:20px;
+}
+
+.Formulaire label{
+    display:block;
+    margin-bottom:8px;
+    margin-top:10px;
+    font-weight:600;
+    color:#334155;
+}
+
+.Formulaire h1{
+       color:#1182ec;
+align-items: center;
+}
+.Formulaire h2{
+       color:#1182ec;
+align-items: center;
+}
+.Formulaire input,
+.Formulaire select{
+    width:100%;
+    padding:12px;
+    border:1px solid #dbeafe;
+    border-radius:12px;
+    outline:none;
+    background:#f8fafc;
+    transition:0.3s;
+}
+
+.Formulaire input:focus,
+.Formulaire select:focus{
+    background:#0d3b66;
+    background:white;
+}
+
+/* =========================
+   BUTTON
+========================= */
+
+.bouton{
+    margin-top:10px;
+    grid-column: span 5;
+    display:flex;
+    gap:15px;
+}
+
+.bouton button{
+    padding:12px 25px;
+    border:none;
+    border-radius:12px;
+    background:#22c55e;
+    color:white;
+    cursor:pointer;
+    font-size:15px;
+    transition:0.3s;
+}
+
+.bouton button:hover{
+    background:#16a34a;
+}
+
+/* =========================
+   TABLE
+========================= */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+}
+
+table th{
+       background:#0d3b66;
+    color:white;
+    padding:15px;
+    text-align:left;
+    font-size:14px;
+}
+
+table td{
+    padding:15px;
+    border-bottom:1px solid #e2e8f0;
+    font-size:14px;
+}
+
+table tr:hover{
+    background:#f8fafc;
+}
+
+/* =========================
+   ACTION BUTTONS
+========================= */
+
+.action{
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+.action a{
+    width:35px;
+    height:35px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:10px;
+    text-decoration:none;
+    transition:0.3s;
+    font-size:15px;
+}
+
+/* edit */
+.action .edit{
+    background:#dbeafe;
+    color:#0d3b66;
+
+}
+
+.action .edit:hover{
+      background:#0d3b66;
+    color:white;
+}
+
+/* delete */
+.action .delete{
+    background:#fee2e2;
+    color:#dc2626;
+}
+
+.action .delete:hover{
+    background:#dc2626;
+    color:white;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:900px){
+
+    .sidebar{
+        width:90px;
+    }
+
+    .Formulaire{
+        margin-left:100px;
+        padding:15px;
+    }
+
+    .recherhe form{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .recherhe input{
+        width:100%;
+    }
+
+    table{
+        display:block;
+        overflow-x:auto;
+    }
+}
+
+.input-box{
+    display:flex;
+    flex-direction:column;
+}
+
+.input-box label{
+    margin-bottom:8px;
+    font-weight:600;
+    color:#334155;
+}
+
+.input-box input,
+.input-box select{
+    width:100%;
+}
+
+@media(max-width:1200px){
+    .Formulaire form{
+        grid-template-columns: repeat(3,1fr);
+    }
+
+    .bouton{
+        grid-column: span 3;
+    }
+}
+
+@media(max-width:700px){
+    .Formulaire form{
+        grid-template-columns:1fr;
+    }
+
+    .bouton{
+        grid-column: span 1;
+    }
+}
