@@ -55,6 +55,41 @@
         transform: rotateY(360deg);
     }
 }
+.btn-search{
+    background:#1d4ed8;
+    color:white;
+    border:none;
+    border-radius:10px;
+    width:42px;
+    height:42px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.btn-search:hover{
+    background:#0d3b66;
+}
+
+.btn-reset{
+    background:#1d4ed8;
+    color:white;
+    width:42px;
+    height:42px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    text-decoration:none;
+    transition:0.3s;
+}
+
+.btn-reset:hover{
+    background:#0d3b66;
+}
 .content{
     margin-left:185px;
     padding: 20px;

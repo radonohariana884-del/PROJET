@@ -232,13 +232,12 @@ if($search != ''){
         placeholder="Rechercher IM..."
         value="<?= $_GET['search'] ?? '' ?>">
 
-        <button type="submit">
-            🔍
-        </button>
-
-        <a href="Payement.php">
-            ↺
-        </a>
+    <button type="submit" class="btn-search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+    </button>
+    <a href="Payement.php" class="btn-reset">
+    <i class="fa-solid fa-rotate-right"></i>
+    </a>
 
     </form>
 
