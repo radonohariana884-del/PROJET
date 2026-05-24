@@ -1,5 +1,11 @@
 <?php
 include("connect.php");
+session_start();
+
+if (!isset($_SESSION["id_user"])) {
+    header("Location: login.php");
+    exit();
+}
 if (isset($_GET['delete'])) {
     $IM = $_GET['delete'];
 
@@ -278,7 +284,7 @@ if (!empty($resultats) && isset($resultats)) {
 <head>
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="Etudiant.css?v=<?= time() ?>"">
+    <link rel="stylesheet" href="Etudiant.css?v=<?= time() ?>">
     <meta charset=" UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion etudiant</title>
@@ -301,6 +307,17 @@ if (!empty($resultats) && isset($resultats)) {
             <a href="Payement.php">
                 <i class="fa-solid fa-money-bill-transfer"></i> Paiement
             </a>
+            <?php if ($_SESSION["role"] == "admin") { ?>
+
+                <a href="Utilisateur.php">
+                    <i class="fa-solid fa-users-gear"></i> Utilisateurs
+                </a>
+
+                <a href="Parametre.php">
+                    <i class="fa-solid fa-gear"></i> Paramètres
+                </a>
+
+            <?php } ?>
             <a href="logout.php" onclick="return confirm('Se déconnecter ?')">
                 <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
             </a>
@@ -320,7 +337,7 @@ if (!empty($resultats) && isset($resultats)) {
             <form action="" method="POST" class="formul">
                 <div class="input-box">
 
-                    <label for="">IM :</label>
+                    <label>IM <span class="required">*</span></label>
                     <input type="text"
                         name="IM" value="<?= isset($dataModifier)
                                                 ? $dataModifier['IM']
@@ -328,7 +345,7 @@ if (!empty($resultats) && isset($resultats)) {
                 </div>
                 <div class="input-box">
 
-                    <label for="">Nom :</label>
+                    <label>Nom <span class="required">*</span></label>
                     <input type="text"
                         name="Nom" value="<?= isset($dataModifier)
                                                 ? $dataModifier['Nom']
@@ -346,7 +363,7 @@ if (!empty($resultats) && isset($resultats)) {
                 </div>
                 <div class="input-box">
 
-                    <label for="">Date de Naissance :</label>
+                    <label>Date de Naissance <span class="required">*</span></label>
                     <input type="date"
                         name="DateNaiss"
                         value="<?= isset($dataModifier)
@@ -356,7 +373,7 @@ if (!empty($resultats) && isset($resultats)) {
                 </div>
                 <div class="input-box">
 
-                    <label for="">Sexe :</label>
+                    <label>Sexe <span class="required">*</span></label>
 
                     <select name="Sexe" required>
 
@@ -380,7 +397,7 @@ if (!empty($resultats) && isset($resultats)) {
 
                 </div>
                 <div class="input-box">
-                    <label for="">Lieu de Naissance :</label>
+                    <label>Lieu de Naissance <span class="required">*</span></label>
                     <input type="text"
                         name="LieuNaiss"
                         value="<?= isset($dataModifier)
@@ -416,7 +433,7 @@ if (!empty($resultats) && isset($resultats)) {
                                     : '' ?>"><br><br>
                 </div>
                 <div class="input-box">
-                    <label for="">Niveau :</label>
+                    <label>Niveau <span class="required">*</span></label>
                     <select name="Id_niv">
 
 
@@ -466,7 +483,7 @@ if (!empty($resultats) && isset($resultats)) {
                 </div>
                 <div class="input-box">
 
-                    <label for="">Mention :</label>
+                    <label>Mention <span class="required">*</span></label>
                     <select name="Mention">
                         <option value="DAII"
                             <?= (isset($dataModifier)
@@ -561,77 +578,81 @@ if (!empty($resultats) && isset($resultats)) {
                     <option value="Partiel">Partiel</option>
                     <option value="Non payé">Non payé</option>
                 </select>
-
+                <a href="impression-etudiant.php?sexe=<?= $_GET['sexe'] ?? 'all' ?>&niveau=<?= $_GET['niveau'] ?? 'all' ?>&mention=<?= $_GET['mention'] ?? 'all' ?>"
+                    target="_blank"
+                    class="btn-print">
+                    <i class="fa fa-print"></i> Imprimer
+                </a>
     </form>
 
     </div>
 
     </div>
     <?php if (!empty($Etudiant)) { ?>
-        <table border="2" id="tableEtudiant">
-            <tr>
-                <th>IM</th>
-                <th> Nom</th>
-                <th> Prenom</th>
-                <th> Date de Naissance</th>
-                <th>Sexe</th>
-                <th> Lieu de Naissance</th>
-                <th> CIN</th>
-                <th> Niveau</th>
-                <th> Mention</th>
-                <th> Montant total</th>
-                <th>Montant total payer</th>
-                <th>Reste</th>
-                <th>Statut</th>
-                <th>Action</th>
-            </tr>
-            <tbody>
+        <div class="table-wrapper">
+            <table border="2" id="tableEtudiant">
+                <tr>
+                    <th>IM</th>
+                    <th> Nom</th>
+                    <th> Prenom</th>
+                    <th> Date de Naissance</th>
+                    <th>Sexe</th>
+                    <th> Lieu de Naissance</th>
+                    <th> CIN</th>
+                    <th> Niveau</th>
+                    <th> Mention</th>
+                    <th> Montant total</th>
+                    <th>Montant total payer</th>
+                    <th>Reste</th>
+                    <th>Statut</th>
+                    <th>Action</th>
+                </tr>
+                <tbody>
 
-                <?php foreach ($Etudiant as $e) { ?>
+                    <?php foreach ($Etudiant as $e) { ?>
+                        <tr>
+                            <td><?= $e['IM'] ?></td>
+                            <td><?= $e['Nom'] ?></td>
+                            <td><?= $e['Prenom'] ?></td>
+                            <td><?= $e['DateNaiss'] ?></td>
+                            <td><?= $e['Sexe'] ?></td>
+                            <td><?= $e['LieuNaiss'] ?></td>
+                            <td><?= $e['CIN'] ?></td>
+                            <td><?= $e['Nom_niv'] ?></td>
+                            <td><?= $e['Mention'] ?></td>
+                            <td><?= $e['Montant_paye'] ?></td>
+                            <td><?= $e['total_paye'] ?></td>
+                            <td><?= $e['Reste'] ?></td>
+                            <td>
+                                <span class="status <?= strtolower(str_replace(' ', '-', $e['Statut'])) ?>">
+                                    <?= $e['Statut'] ?>
+                                </span>
+                            </td>
+                            <td class="action">
+                                <a href="Etudiant.php?IM=<?= $e['IM'] ?>" class="edit" title="Modifier">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+
+                                <a href="Etudiant.php?delete=<?= $e['IM'] ?>" class="delete" title="Supprimer">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+
+                    <?php } ?>
+
+                <?php } else { ?>
+
                     <tr>
-                        <td><?= $e['IM'] ?></td>
-                        <td><?= $e['Nom'] ?></td>
-                        <td><?= $e['Prenom'] ?></td>
-                        <td><?= $e['DateNaiss'] ?></td>
-                        <td><?= $e['Sexe'] ?></td>
-                        <td><?= $e['LieuNaiss'] ?></td>
-                        <td><?= $e['CIN'] ?></td>
-                        <td><?= $e['Nom_niv'] ?></td>
-                        <td><?= $e['Mention'] ?></td>
-                        <td><?= $e['Montant_paye'] ?></td>
-                        <td><?= $e['total_paye'] ?></td>
-                        <td><?= $e['Reste'] ?></td>
-                        <td>
-                            <span class="status <?= strtolower(str_replace(' ', '-', $e['Statut'])) ?>">
-                                <?= $e['Statut'] ?>
-                            </span>
-                        </td>
-                        <td class="action">
-                            <a href="Etudiant.php?IM=<?= $e['IM'] ?>" class="edit">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </a>
-                            <a href="Etudiant.php?delete=<?= $e['IM'] ?>"
-                                class="delete"
-                                onclick="return confirm('Voulez-vous vraiment supprimer cet étudiant ?')">
-                                <i class="fa-solid fa-trash"></i>
-                            </a>
+                        <td colspan="14" style="text-align:center; color:red;">
+                            Aucun étudiant trouvé
                         </td>
                     </tr>
 
                 <?php } ?>
-
-            <?php } else { ?>
-
-                <tr>
-                    <td colspan="14" style="text-align:center; color:red;">
-                        Aucun étudiant trouvé
-                    </td>
-                </tr>
-
-            <?php } ?>
-            </tbody>
-        </table>
-
+                </tbody>
+            </table>
+        </div>
         </div>
 </body>
 

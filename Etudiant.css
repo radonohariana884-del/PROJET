@@ -1,3 +1,62 @@
+.required {
+    color: #ef4444;
+    font-size: 16px;
+    margin-left: 4px;
+}
+.tools {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* bouton imprimer */
+.btn-print {
+    background: #1e88e5;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.3s;
+}
+
+.btn-print:hover {
+    background: #1565c0;
+    transform: scale(1.05);
+}
+
+/* alignement filtre */
+.filter-box,
+.tri-box {
+    display: flex;
+    gap: 8px;
+}
+
+@media print {
+
+    .sidebar,
+    .btn-print,
+    .recherhe,
+    .tools,
+    .action {
+        display: none !important;
+    }
+
+    body {
+        background: white;
+    }
+
+    table {
+        width: 100%;
+        font-size: 12px;
+    }
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -71,8 +130,9 @@ body {
 
 .Formulaire {
     margin-left: 185px;
-    width: 90%;
-    padding: 30px;
+    padding: 25px;
+    background: #e6ebf2;
+    min-height: 100vh;
 }
 
 /* =========================
@@ -80,6 +140,7 @@ body {
 ========================= */
 
 .recherhe {
+    margin-top: 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -387,68 +448,83 @@ table tr:hover {
     color: white;
 }
 
+.icon-btn {
+    position: relative;
+}
+
+.icon-btn::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #111;
+    color: white;
+    padding: 5px 8px;
+    font-size: 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+
 /* =========================
    RESPONSIVE
 ========================= */
 
-@media(max-width:900px) {
+@media (max-width: 768px) {
 
+    /* SIDEBAR devient TOP */
     .sidebar {
-        width: 90px;
-    }
-
-    .Formulaire {
-        margin-left: 100px;
-        padding: 15px;
-    }
-
-    .recherhe form {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .recherhe input {
+        position: relative;
         width: 100%;
+        height: auto;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 10px;
     }
 
-    table {
-        display: block;
-        overflow-x: auto;
+    .menu {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 10px;
     }
-}
 
-.input-box {
-    display: flex;
-    flex-direction: column;
-}
+    .sidebar a {
+        font-size: 12px;
+        padding: 8px;
+    }
 
-.input-box label {
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #334155;
-}
+    .sidebar img {
+        width: 50px;
+        height: 50px;
+        margin: 0;
+    }
 
-.input-box input,
-.input-box select {
+    /* CONTENT RESET */
+    .Formulaire {
+        margin-left: 0;
+        padding: 10px;
+    }
+
+    .formul {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+    }
+
+    /* TABLE scroll */
+   table {
     width: 100%;
+    border-collapse: collapse;
+    min-width: 800px; /* manery scroll rehefa petit écran */
 }
 
-@media(max-width:1200px) {
-    .Formulaire form {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    .bouton {
-        grid-column: span 3;
-    }
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
 }
-
-@media(max-width:700px) {
-    .Formulaire form {
-        grid-template-columns: 1fr;
-    }
-
-    .bouton {
-        grid-column: span 1;
-    }
 }

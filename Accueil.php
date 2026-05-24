@@ -2,6 +2,40 @@
 
 include("connect.php");
 
+// graphique
+$sqlStat = "
+SELECT 
+SUM(CASE WHEN Statut='Payé' THEN 1 ELSE 0 END) AS paye,
+SUM(CASE WHEN Statut='Partiel' THEN 1 ELSE 0 END) AS partiel,
+SUM(CASE WHEN Statut='Non payé' THEN 1 ELSE 0 END) AS nonpaye
+FROM (
+    SELECT 
+    CASE
+        WHEN COALESCE(SUM(p.Montant_total),0) = 0 THEN 'Non payé'
+        WHEN COALESCE(SUM(p.Montant_total),0) < n.Montant_paye THEN 'Partiel'
+        ELSE 'Payé'
+    END AS Statut
+    FROM etudiant e
+    JOIN niveau n ON e.Id_niv=n.Id_niv
+    LEFT JOIN payement p ON e.IM=p.IM
+    GROUP BY e.IM
+) t
+";
+
+$stmtStat = $pdo->prepare($sqlStat);
+$stmtStat->execute();
+$stat = $stmtStat->fetch();
+
+
+// retour au login
+session_start();
+
+if (!isset($_SESSION["id_user"])) {
+    header("Location: login.php");
+    exit();
+}
+
+
 /*    NOMBRE ETUDIANTS */
 
 $sql1 = "SELECT COUNT(*) AS totalEtudiant FROM etudiant";
@@ -74,20 +108,22 @@ ORDER BY p.DateCreation DESC, p.Id DESC
 
 LIMIT 3
 ";
- $stmt=$pdo->prepare ($Sql5);
- $stmt->execute();
- $Derniere=$stmt->fetchAll();
+$stmt = $pdo->prepare($Sql5);
+$stmt->execute();
+$Derniere = $stmt->fetchAll();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="Accueil.css">
+    <link rel="stylesheet" href="Accueil.css?v=<?= time() ?>">
     <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <title>Accueil</title>
 </head>
 
@@ -98,22 +134,31 @@ LIMIT 3
         </center>
         <div class="menu">
             <a href="Accueil.php">
-    <i class="fa-solid fa-house"></i> Accueil
-</a>
+                <i class="fa-solid fa-house"></i> Accueil
+            </a>
 
-<a href="Etudiant.php">
-    <i class="fa-solid fa-user-graduate"></i> Étudiants
-</a>
+            <a href="Etudiant.php">
+                <i class="fa-solid fa-user-graduate"></i> Étudiants
+            </a>
 
-<a href="Payement.php">
-    <i class="fa-solid fa-money-bill-transfer"></i> Paiement
-</a>
+            <a href="Payement.php">
+                <i class="fa-solid fa-money-bill-transfer"></i> Paiement
+            </a>
+
+            <a href="Utilisateur.php">
+                <i class="fa-solid fa-users-gear"></i> Utilisateurs
+            </a>
+
+            <a href="Parametre.php">
+                <i class="fa-solid fa-gear"></i> Paramètres
+            </a>
+
             <a href="logout.php" onclick="return confirm('Se déconnecter ?')">
-                  <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
+                <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
             </a>
         </div>
     </div>
-      <!-- CONTENU -->
+    <!-- CONTENU -->
 
     <div class="content">
         <div class="topbar">
@@ -194,9 +239,29 @@ LIMIT 3
             </div>
 
         </div>
+        <!-- statistique -->
+        <div class="graph-box">
 
-          <div class="table-box">
+            <h2>Statistique Paiement par Niveau</h2>
 
+            <canvas id="myChart" height="120"></canvas>
+
+        </div>
+        <div class="table-box">
+            <!-- graphique rond -->
+            <div class="charts">
+
+                <!-- BAR CHART -->
+                <div class="chart-box">
+                    <canvas id="barChart"></canvas>
+                </div>
+
+                <!-- DONUT CHART -->
+                <div class="chart-box">
+                    <canvas id="donutChart"></canvas>
+                </div>
+
+            </div>
             <h2>Derniers Paiements</h2>
 
             <table>
@@ -208,22 +273,53 @@ LIMIT 3
                     <th>Mention</th>
                     <th>Niveau</th>
                     <th>Montant</th>
-                    
+
                 </tr>
-                <?php foreach($Derniere as $e){?> 
-                <tr>
-                    <td><?=$e['IM']?></td>
-                    <td><?=$e['Nom']?></td>
-                    <td><?=$e['Prenom']?></td>
-                    <td><?=$e['Mention']?></td>
-                    <td><?=$e['Nom_niv']?></td>
-                    <td><?=$e['Montant_total']?></td>
-                     
-                </tr>
-                <?php }?>
+                <?php foreach ($Derniere as $e) { ?>
+                    <tr>
+                        <td><?= $e['IM'] ?></td>
+                        <td><?= $e['Nom'] ?></td>
+                        <td><?= $e['Prenom'] ?></td>
+                        <td><?= $e['Mention'] ?></td>
+                        <td><?= $e['Nom_niv'] ?></td>
+                        <td><?= $e['Montant_total'] ?></td>
+
+                    </tr>
+                <?php } ?>
             </table>
-         </div>
+        </div>
     </div>
+    <script>
+        const barChart = new Chart(document.getElementById('barChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Etudiants', 'Paiements', 'Reste'],
+                datasets: [{
+                    label: 'Statistiques',
+                    data: [
+                        <?= $etudiant['totalEtudiant'] ?>,
+                        <?= $paiement['totalPaiement'] ?>,
+                        <?= $reste['resteTotal'] ?>
+                    ],
+                    backgroundColor: ['#2563eb', '#22c55e', '#f59e0b']
+                }]
+            }
+        });
+        const donutChart = new Chart(document.getElementById('donutChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Payé', 'Partiel', 'Non payé'],
+                datasets: [{
+                    data: [
+                        <?= $stat['paye'] ?>,
+                        <?= $stat['partiel'] ?>,
+                        <?= $stat['nonpaye'] ?>
+                    ],
+                    backgroundColor: ['#22c55e', '#f59e0b', '#ef4444']
+                }]
+            }
+        });
+    </script>
 </body>
 
 </html>

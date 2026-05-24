@@ -1,6 +1,11 @@
 <?php
 include("connect.php");
+session_start();
 
+if (!isset($_SESSION["id_user"])) {
+    header("Location: login.php");
+    exit();
+}
 if (!isset($_GET['id'])) {
     die("ID manquant");
 }
@@ -26,7 +31,7 @@ if (!$data) {
 <html>
 
 <head>
-    <title>Reçu de paiement</title>
+    <title></title>
     <style>
         body {
             font-family: Arial;
@@ -50,6 +55,10 @@ if (!$data) {
 
         .ligne {
             margin: 10px 0;
+        }
+
+        @page {
+            margin: 10mm;
         }
 
         .btn-group {
@@ -87,9 +96,28 @@ if (!$data) {
             border: none;
         }
 
+        .print:hover {
+            background: #060684;
+        }
+
+        @media print {
+
+            .btn-print,
+            .btn-retour,
+            button,
+            .btn-group {
+                display: none !important;
+            }
+
+        }
+
         .back {
             background: #e74c3c;
             color: white;
+        }
+
+        .back:hover {
+            background: #cc3e12;
         }
 
         button {
@@ -126,8 +154,8 @@ if (!$data) {
 
     </div>
     <div class="btn-group">
-        <button onclick="window.print()" class="btn print">Imprimer</button>
-        <a href="Payement.php" class="btn back">Retour</a>
+        <a href="Payement.php" class="btn back"> ⬅ Retour</a>
+        <button onclick="window.print()" class="btn print"> 🖨 Imprimer</button>
     </div>
 
 </body>
