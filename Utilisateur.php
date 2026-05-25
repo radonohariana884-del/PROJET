@@ -177,7 +177,11 @@ if (isset($_POST["change_pass"])) {
         @media(max-width:600px) {
             .header {
                 flex-direction: column;
+                padding: 20px;
                 text-align: center;
+            }
+            .bt{
+                margin-top: 20px;
             }
         }
     </style>
@@ -192,7 +196,7 @@ if (isset($_POST["change_pass"])) {
             🛡️ <?= $_SESSION["role"] ?>
         </div>
 
-        <div>
+        <div class="bt">
             <a href="Accueil.php" class="accueil-btn" >⬅ Accueil</a>
           <a href="logout.php" class="logout-btn">🚪 Logout</a>
 
