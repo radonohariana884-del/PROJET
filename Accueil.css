@@ -4,7 +4,6 @@
     margin-top: 30px;
     flex-wrap: wrap;
 }
-
 .chart-box {
     flex: 1;
     min-width: 300px;
@@ -22,7 +21,7 @@ canvas {
     width: (100%-180px);
     margin: 20px auto;
     background: #0d3b66;
-    height: 100px;
+    height: 80px;
     padding: 20px;
     border-radius: 20px;
     color: white;
@@ -52,7 +51,16 @@ body {
 .menu {
     margin-top: 20px;
 }
+.btn-logout-bottom{
+    background:#dc2626;
+    color:white;
+    border-radius: 20px;
+}
 
+.btn-logout-bottom:hover{
+    background:#b91c1c !important;
+    color: white;
+}
 .sidebar a {
     display: block;
     color: white;

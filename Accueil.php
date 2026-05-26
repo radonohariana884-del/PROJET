@@ -148,12 +148,7 @@ $Derniere = $stmt->fetchAll();
             <a href="Utilisateur.php">
                 <i class="fa-solid fa-users-gear"></i> Utilisateurs
             </a>
-
-            <a href="Parametre.php">
-                <i class="fa-solid fa-gear"></i> Paramètres
-            </a>
-
-            <a href="logout.php" onclick="return confirm('Se déconnecter ?')">
+            <a  class="btn-logout-bottom" href="logout.php" onclick="return confirm('Se déconnecter ?')">
                 <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
             </a>
         </div>
@@ -242,7 +237,7 @@ $Derniere = $stmt->fetchAll();
         <!-- statistique -->
         <div class="graph-box">
 
-            <h2>Statistique Paiement par Niveau</h2>
+            <h2>Statistique </h2>
 
             <canvas id="myChart" height="120"></canvas>
 

@@ -96,6 +96,20 @@ if (isset($_POST["change_pass"])) {
             border-radius: 6px;
         }
 
+        .user-btn {
+            background: #7c3aed;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-left: 10px;
+            transition: 0.3s;
+        }
+
+        .user-btn:hover {
+            background: #6d28d9;
+        }
+
         /* CONTAINER */
         .container {
             width: 90%;
@@ -145,6 +159,22 @@ if (isset($_POST["change_pass"])) {
             cursor: pointer;
         }
 
+        .btn-cancel {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 15px;
+            background: #ef4444;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .btn-cancel:hover {
+            background: #dc2626;
+        }
+
         .logout-btn {
             background: #dc2626;
             color: white;
@@ -180,7 +210,8 @@ if (isset($_POST["change_pass"])) {
                 padding: 20px;
                 text-align: center;
             }
-            .bt{
+
+            .bt {
                 margin-top: 20px;
             }
         }
@@ -197,8 +228,26 @@ if (isset($_POST["change_pass"])) {
         </div>
 
         <div class="bt">
-            <a href="Accueil.php" class="accueil-btn" >⬅ Accueil</a>
-          <a href="logout.php" class="logout-btn">🚪 Logout</a>
+
+            <a href="Accueil.php" class="accueil-btn">
+                ⬅ Accueil
+            </a>
+
+            <?php if ($_SESSION["role"] == "admin") { ?>
+
+                <a href="Parametre.php" class="user-btn">
+                    ➕ Ajouter Utilisateur
+                </a>
+
+            <?php } ?>
+
+            <a href="logout.php"
+                class="logout-btn"
+                onclick="return confirm('Se déconnecter ?')">
+
+                Logout
+
+            </a>
 
         </div>
     </div>
@@ -230,7 +279,10 @@ if (isset($_POST["change_pass"])) {
             <form method="POST">
                 <input type="text" name="nom" value="<?= $user['nom'] ?>" required>
                 <input type="email" name="email" value="<?= $user['email'] ?>" required>
+
                 <button name="update">Modifier</button>
+
+                <a href="Utilisateur.php" class="btn-cancel">Annuler</a>
             </form>
         </div>
 
@@ -244,6 +296,8 @@ if (isset($_POST["change_pass"])) {
                 <input type="password" name="confirm_pass" placeholder="Confirmer" required>
 
                 <button name="change_pass">Changer</button>
+
+                <a href="Utilisateur.php" class="btn-cancel">Annuler</a>
             </form>
         </div>
 

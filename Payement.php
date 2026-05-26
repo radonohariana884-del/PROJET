@@ -31,20 +31,77 @@ if (isset($_GET['id'])) {
 }
 if (isset($_POST["Ajouter"])) {
 
-    $IM = $_POST['IM'];
+    $IM = trim($_POST['IM']);
     $Date_payement = $_POST['Date_payement'];
     $Montant_total = $_POST['Montant_total'];
 
-    $Sql = "INSERT INTO payement(IM,Date_payement,Montant_total) VALUES(:IM,:Date_payement,:Montant_total)";
-    $verifie = $pdo->prepare($Sql);
-    $verifie->execute(
-        [
+    /* VERIFICATION IM */
+    $check = $pdo->prepare("SELECT * FROM etudiant WHERE IM = :IM");
 
-            ':IM' => $IM,
-            ':Date_payement' => $Date_payement,
-            ':Montant_total' => $Montant_total
-        ]
-    );
+    $check->execute([
+        ':IM' => $IM
+    ]);
+
+    $etudiant = $check->fetch(PDO::FETCH_ASSOC);
+
+    if (!$etudiant) {
+
+        die("IM introuvable dans la table étudiant");
+    }
+    // fonction re recuperatio reste
+    function getReste($pdo, $IM)
+    {
+
+        $sql = "
+    SELECT 
+        n.Montant_paye - COALESCE(SUM(p.Montant_total),0) AS reste
+    FROM etudiant e
+    JOIN niveau n ON e.Id_niv = n.Id_niv
+    LEFT JOIN payement p ON e.IM = p.IM
+    WHERE e.IM = :IM
+    GROUP BY e.IM
+    ";
+
+        $req = $pdo->prepare($sql);
+        $req->execute([':IM' => $IM]);
+
+        $data = $req->fetch(PDO::FETCH_ASSOC);
+
+        return $data['reste'] ?? 0;
+    }
+    /* VERIFICATION MONTANT */
+    $IM = trim($_POST['IM']);
+    $Date_payement = $_POST['Date_payement'];
+    $Montant_total = $_POST['Montant_total'];
+
+    $reste = getReste($pdo, $IM);
+
+    if ($Montant_total <= 0) {
+        die("Montant invalide");
+    }
+
+    if ($Montant_total > $reste) {
+        die("Erreur: montant dépasse le reste à payer ($reste Ar)");
+    }
+
+    /* INSERT */
+    $Sql = "INSERT INTO payement
+            (IM,Date_payement,Montant_total)
+            VALUES
+            (:IM,:Date_payement,:Montant_total)";
+
+    $verifie = $pdo->prepare($Sql);
+
+    $verifie->execute([
+
+        ':IM' => $IM,
+        ':Date_payement' => $Date_payement,
+        ':Montant_total' => $Montant_total
+
+    ]);
+
+    header("Location: Payement.php");
+    exit();
 }
 if (isset($_POST["Modifier"])) {
     $id_old = $_POST['id_old'];
@@ -152,13 +209,8 @@ $Payement = $stmt->fetchAll();
                 <a href="Utilisateur.php">
                     <i class="fa-solid fa-users-gear"></i> Utilisateurs
                 </a>
-
-                <a href="Parametre.php">
-                    <i class="fa-solid fa-gear"></i> Paramètres
-                </a>
-
             <?php } ?>
-            <a href="logout.php" onclick="return confirm('Se déconnecter ?')">
+            <a class="btn-logout-bottom" href="logout.php" onclick="return confirm('Se déconnecter ?')">
                 <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
             </a>
         </div>
@@ -195,11 +247,34 @@ $Payement = $stmt->fetchAll();
                     <div class="input-group">
 
                         <label>IM</label>
-
-                        <input type="text"
+                        <input list="liste_etudiant"
                             name="IM"
-                            value="<?= isset($data) ? $data['IM'] : '' ?>">
+                            placeholder="Rechercher IM ou Nom"
+                            required>
 
+                        <datalist id="liste_etudiant">
+
+                            <?php
+
+                            $sqlEtu = "SELECT IM, Nom, Prenom FROM etudiant";
+                            $reqEtu = $pdo->query($sqlEtu);
+
+                            while ($etu = $reqEtu->fetch()) {
+
+                            ?>
+
+                                <option value="<?= $etu['IM'] ?>">
+
+                                    <?= $etu['Nom'] ?>
+                                    <?= $etu['Prenom'] ?>
+
+                                </option>
+
+                            <?php } ?>
+
+                        </datalist>
+
+                        </select>
                     </div>
 
                     <div class="input-group">
@@ -217,11 +292,13 @@ $Payement = $stmt->fetchAll();
 
                         <label>Montant total</label>
 
-                        <input type="text"
+                        <input type="number"
                             name="Montant_total"
+                            min="0"
+                            max="5000000"
+                            step="0.01"
                             value="<?= isset($data) ? $data['Montant_total'] : '' ?>"
                             required>
-
                     </div>
 
                     <input type="hidden"

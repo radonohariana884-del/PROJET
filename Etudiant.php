@@ -312,13 +312,8 @@ if (!empty($resultats) && isset($resultats)) {
                 <a href="Utilisateur.php">
                     <i class="fa-solid fa-users-gear"></i> Utilisateurs
                 </a>
-
-                <a href="Parametre.php">
-                    <i class="fa-solid fa-gear"></i> Paramètres
-                </a>
-
             <?php } ?>
-            <a href="logout.php" onclick="return confirm('Se déconnecter ?')">
+            <a class="btn-logout-bottom" href="logout.php" onclick="return confirm('Se déconnecter ?')">
                 <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
             </a>
         </div>

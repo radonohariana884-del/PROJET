@@ -80,7 +80,16 @@ body {
 .menu {
     margin-top: 20px;
 }
+.btn-logout-bottom{
+    background:#dc2626;
+    color:white;
+    border-radius: 20px;
+}
 
+.btn-logout-bottom:hover{
+    background:#b91c1c !important;
+    color: white;
+}
 .sidebar a {
     display: block;
     color: white;

@@ -2,58 +2,74 @@
 include("connect.php");
 session_start();
 
+/* SECURITE LOGIN */
 if (!isset($_SESSION["id_user"])) {
     header("Location: login.php");
     exit();
 }
+$edit = false;
+$data = [];
+$users = [];
+/* USER CONNECTE */
+$id_user = $_SESSION["id_user"];
 
-$id = $_SESSION["id_user"];
-
-/* USER */
 $sql = "SELECT * FROM utilisateurs WHERE id = :id";
 $req = $pdo->prepare($sql);
-$req->execute([':id' => $id]);
+$req->execute([':id' => $id_user]);
 $user = $req->fetch(PDO::FETCH_ASSOC);
 
-/* UPDATE PROFIL */
-if (isset($_POST["update"])) {
+/* ADMIN ONLY */
+if ($_SESSION["role"] == "admin") {
 
-    $sql = "UPDATE utilisateurs SET nom=:nom, email=:email WHERE id=:id";
-    $req = $pdo->prepare($sql);
-    $req->execute([
-        ':nom' => $_POST["nom"],
-        ':email' => $_POST["email"],
-        ':id' => $id
-    ]);
+    if (isset($_GET['delete'])) {
+        $sql = "DELETE FROM utilisateurs WHERE id = :id";
+        $req = $pdo->prepare($sql);
+        $req->execute([':id' => $_GET['delete']]);
+        header("Location: Utilisateur.php");
+        exit();
+    }
 
-    $_SESSION["nom"] = $_POST["nom"];
+    $edit = false;
+    $data = [];
 
-    header("Location: Parametre.php");
-    exit();
-}
+    if (isset($_GET['edit'])) {
+        $edit = true;
+        $sql = "SELECT * FROM utilisateurs WHERE id = :id";
+        $req = $pdo->prepare($sql);
+        $req->execute([':id' => $_GET['edit']]);
+        $data = $req->fetch(PDO::FETCH_ASSOC);
+    }
 
-/* PASSWORD */
-if (isset($_POST["change_pass"])) {
-
-    $current = $_POST["current_pass"];
-    $new = $_POST["new_pass"];
-    $confirm = $_POST["confirm_pass"];
-
-    if ($current != $user["mot_de_passe"]) {
-        $error = "Mot de passe actuel incorrect";
-    } elseif ($new != $confirm) {
-        $error = "Les mots de passe ne correspondent pas";
-    } else {
-
-        $sql = "UPDATE utilisateurs SET mot_de_passe=:pass WHERE id=:id";
+    if (isset($_POST['Ajouter'])) {
+        $sql = "INSERT INTO utilisateurs(nom,email,mot_de_passe,role)
+                VALUES(:nom,:email,:mot_de_passe,:role)";
         $req = $pdo->prepare($sql);
         $req->execute([
-            ':pass' => $new,
-            ':id' => $id
+            ':nom' => $_POST['nom'],
+            ':email' => $_POST['email'],
+            ':mot_de_passe' => password_hash($_POST['mot_de_passe'], PASSWORD_DEFAULT),
+            ':role' => $_POST['role']
         ]);
 
-        $success = "Mot de passe modifié";
+        header("Location: Utilisateur.php");
+        exit();
     }
+
+    if (isset($_POST['Modifier'])) {
+        $sql = "UPDATE utilisateurs SET nom=:nom,email=:email,role=:role WHERE id=:id";
+        $req = $pdo->prepare($sql);
+        $req->execute([
+            ':nom' => $_POST['nom'],
+            ':email' => $_POST['email'],
+            ':role' => $_POST['role'],
+            ':id' => $_POST['id']
+        ]);
+
+        header("Location: Utilisateur.php");
+        exit();
+    }
+
+    $users = $pdo->query("SELECT * FROM utilisateurs")->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
 
@@ -62,25 +78,19 @@ if (isset($_POST["change_pass"])) {
 
 <head>
     <meta charset="UTF-8">
-    <title>Paramètres</title>
+    <title>Utilisateurs</title>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial;
-        }
-
-        /* BACKGROUND */
         body {
-            background: #0f172a;
-            color: white;
+            font-family: Arial;
+            background: #f1f5f9;
+            margin: 0;
         }
 
-        /* TOPBAR */
-        .topbar {
-            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+        /* HEADER */
+        .header {
+            background: #1d4ed8;
+            color: white;
             padding: 15px;
             display: flex;
             justify-content: space-between;
@@ -88,100 +98,173 @@ if (isset($_POST["change_pass"])) {
             flex-wrap: wrap;
         }
 
-        .topbar h2 {
-            margin: 0;
-        }
-
-        .topbar small {
-            color: #dbeafe;
-        }
-
-        /* BUTTONS */
-        .btn {
-            padding: 10px 12px;
-            border-radius: 8px;
+        .header .btn {
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 6px;
             text-decoration: none;
             color: white;
-            margin: 5px;
-            display: inline-block;
         }
 
-        .green {
+        .btn-back {
             background: #16a34a;
         }
 
-        .red {
-            background: #dc2626;
+        .btn-pay {
+            background: #7c3aed;
         }
 
-        .blue {
-            background: #2563eb;
+        .btn-logout {
+            background: #dc2626;
         }
 
         /* CONTAINER */
         .container {
-            width: 40%;
+            width: 90%;
+            max-width: 1100px;
             margin: auto;
-            margin-top: 30px;
+            padding: 20px;
         }
 
         /* CARD */
         .card {
             background: white;
-            color: black;
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         /* INPUT */
-        input {
+        input,
+        select {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             margin: 8px 0;
-            border-radius: 8px;
-            border: 1px solid #ccc;
+            border-radius: 6px;
+            border: 1px solid #ddd;
         }
 
         /* BUTTON */
         button {
+            background: #2563eb;
+            display: block;
+            width: 30%;
+            text-align: center;
+            margin-top: 8px;
+            padding: 10px;
+            border-radius: 6px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .AA {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-cancel {
+            background: #ef4444;
+            display: block;
+            width: 30%;
+            text-align: center;
+            margin-top: 8px;
+            padding: 10px;
+            border-radius: 6px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-cancel:hover {
+            background: #dc2626;
+        }
+
+        /* TABLE */
+        table {
             width: 100%;
-            padding: 12px;
+            border-collapse: collapse;
+        }
+
+        th {
             background: #2563eb;
             color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        /* MESSAGE */
-        .error {
-            background: #dc2626;
             padding: 10px;
-            border-radius: 8px;
         }
 
-        .success {
-            background: #16a34a;
+        td {
             padding: 10px;
-            border-radius: 8px;
+            border-bottom: 1px solid #ddd;
         }
 
-        /* RESPONSIVE */
-        @media(max-width:768px) {
+        /* ACTION */
+        a {
+            text-decoration: none;
+            margin: 5px;
+        }
 
-            .container {
-                width: 95%;
-            }
+        .edit {
+            color: green;
+        }
 
-            .topbar {
+        .delete {
+            color: red;
+        }
+
+        /* RESPONSIVE MOBILE */
+        @media (max-width: 768px) {
+
+            .header {
                 flex-direction: column;
                 text-align: center;
+                padding: 20px;
             }
 
-            .btn {
+            .bt {
+                margin-top: 20px;
+            }
+
+            .header .btn {
                 width: 100%;
                 text-align: center;
+            }
+
+            .container {
+                width: 100%;
+                padding: 10px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+        }
+
+        /* VERY SMALL SCREEN */
+        @media (max-width: 480px) {
+            .header {
+                padding: 10px;
+            }
+
+            .header .btn {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            button {
+                font-size: 14px;
             }
         }
     </style>
@@ -190,60 +273,91 @@ if (isset($_POST["change_pass"])) {
 
 <body>
 
-    <!-- TOPBAR -->
-    <div class="topbar">
+    <!-- HEADER -->
+    <div class="header">
 
         <div>
-            <h2>👤 <?= $_SESSION["nom"] ?></h2>
-            <small><?= $user["email"] ?> | <?= $_SESSION["role"] ?></small>
+            👤 <?= $_SESSION["nom"] ?> | 🛡️ <?= $_SESSION["role"] ?>
         </div>
 
-        <div>
-            <a class="btn blue" href="Accueil.php">Accueil</a>
-            <a class="btn green" href="Utilisateur.php">Utilisateurs</a>
-            <a class="btn red" href="logout.php">Logout</a>
+        <div class="bt">
+            <a href="Accueil.php" class="btn btn-back">⬅ Accueil</a>
+            <a href="Utilisateur.php" class="btn btn-pay">👥 Utilisateurs</a>
+            <a href="logout.php" class="btn btn-logout"
+                onclick="return confirm('Déconnexion ?')">
+                Logout
+            </a>
+
         </div>
 
     </div>
 
-    <!-- CONTAINER -->
     <div class="container">
 
-        <?php if (isset($error)) echo "<div class='error'>$error</div>"; ?>
-        <?php if (isset($success)) echo "<div class='success'>$success</div>"; ?>
+        <?php if ($_SESSION["role"] == "admin") { ?>
 
-        <!-- PROFIL -->
-        <div class="card">
+            <!-- FORMULAIRE -->
+            <div class="card">
+                <h3><?= $edit ? "Modifier utilisateur" : "Ajouter utilisateur" ?></h3>
 
-            <h3>Modifier Profil</h3>
+                <form method="POST">
 
-            <form method="POST">
+                    <input type="hidden" name="id" value="<?= $data['id'] ?? '' ?>">
 
-                <input type="text" name="nom" value="<?= $user['nom'] ?>">
-                <input type="email" name="email" value="<?= $user['email'] ?>">
+                    <input type="text" name="nom" placeholder="Nom" value="<?= $data['nom'] ?? '' ?>" required>
 
-                <button name="update">Modifier</button>
+                    <input type="email" name="email" placeholder="Email" value="<?= $data['email'] ?? '' ?>" required>
 
-            </form>
+                    <input type="password" name="mot_de_passe" placeholder="Mot de passe">
 
-        </div>
+                    <select name="role">
+                        <option value="admin">Admin</option>
+                        <option value="caissier">Caissier</option>
+                    </select>
+                    <div class="AA">
+                        <button type="submit" name="<?= $edit ? 'Modifier' : 'Ajouter' ?>">
+                            <?= $edit ? 'Modifier' : 'Ajouter' ?>
+                        </button>
+                        <a href="Utilisateur.php" class="btn-cancel">
+                            Annuler
+                        </a>
+                    </div>
 
-        <!-- PASSWORD -->
-        <div class="card">
+                </form>
+            </div>
 
-            <h3>Changer mot de passe</h3>
+            <!-- TABLE -->
+            <div class="card">
+                <h3>Liste utilisateurs</h3>
 
-            <form method="POST">
+                <div class="table-wrapper">
+                    <table>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Rôle</th>
+                            <th>Action</th>
+                        </tr>
 
-                <input type="password" name="current_pass" placeholder="Actuel">
-                <input type="password" name="new_pass" placeholder="Nouveau">
-                <input type="password" name="confirm_pass" placeholder="Confirmer">
+                        <?php foreach ($users as $u) { ?>
+                            <tr>
+                                <td><?= $u['id'] ?></td>
+                                <td><?= $u['nom'] ?></td>
+                                <td><?= $u['email'] ?></td>
+                                <td><?= $u['role'] ?></td>
+                                <td>
+                                    <a class="edit" href="Utilisateur.php?edit=<?= $u['id'] ?>">Modifier</a>
+                                    <a class="delete" href="Utilisateur.php?delete=<?= $u['id'] ?>" onclick="return confirm('Supprimer ?')">Supprimer</a>
+                                </td>
+                            </tr>
+                        <?php } ?>
 
-                <button name="change_pass">Changer</button>
+                    </table>
+                </div>
+            </div>
 
-            </form>
-
-        </div>
+        <?php } ?>
 
     </div>
 

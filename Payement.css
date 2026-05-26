@@ -348,7 +348,16 @@ table {
 .table-header {
     margin-bottom: 15px;
 }
+.btn-logout-bottom{
+    background:#dc2626;
+    color:white;
+    border-radius: 20px;
+}
 
+.btn-logout-bottom:hover{
+    background:#b91c1c !important;
+    color: white;
+}
 .table-header h2 {
     width: 100%;
     text-align: center;
