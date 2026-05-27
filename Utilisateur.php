@@ -43,17 +43,26 @@ if (isset($_POST["change_pass"])) {
     $new = $_POST["new_pass"];
     $confirm = $_POST["confirm_pass"];
 
-    // ⚠️ raha mbola tsy hashed password ao DB
-    if ($current != $user["mot_de_passe"]) {
+    // Vérification ancien mot de passe
+    if (!password_verify($current, $user["mot_de_passe"])) {
+
         $error = "Mot de passe actuel incorrect";
     } elseif ($new != $confirm) {
+
         $error = "Les mots de passe ne correspondent pas";
     } else {
 
-        $sql = "UPDATE utilisateurs SET mot_de_passe=:pass WHERE id=:id";
+        // Hash nouveau mot de passe
+        $newHash = password_hash($new, PASSWORD_DEFAULT);
+
+        $sql = "UPDATE utilisateurs 
+                SET mot_de_passe = :pass 
+                WHERE id = :id";
+
         $req = $pdo->prepare($sql);
+
         $req->execute([
-            ':pass' => $new,
+            ':pass' => $newHash,
             ':id' => $id
         ]);
 

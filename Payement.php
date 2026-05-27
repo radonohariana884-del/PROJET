@@ -204,12 +204,9 @@ $Payement = $stmt->fetchAll();
             <a href="Payement.php">
                 <i class="fa-solid fa-money-bill-transfer"></i> Paiement
             </a>
-            <?php if ($_SESSION["role"] == "admin") { ?>
-
-                <a href="Utilisateur.php">
-                    <i class="fa-solid fa-users-gear"></i> Utilisateurs
-                </a>
-            <?php } ?>
+            <a href="Utilisateur.php">
+                <i class="fa-solid fa-users-gear"></i> Utilisateurs
+            </a>
             <a class="btn-logout-bottom" href="logout.php" onclick="return confirm('Se déconnecter ?')">
                 <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
             </a>

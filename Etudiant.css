@@ -3,6 +3,7 @@
     font-size: 16px;
     margin-left: 4px;
 }
+
 .tools {
     display: flex;
     align-items: center;
@@ -80,16 +81,18 @@ body {
 .menu {
     margin-top: 20px;
 }
-.btn-logout-bottom{
-    background:#dc2626;
-    color:white;
+
+.btn-logout-bottom {
+    background: #dc2626;
+    color: white;
     border-radius: 20px;
 }
 
-.btn-logout-bottom:hover{
-    background:#b91c1c !important;
+.btn-logout-bottom:hover {
+    background: #b91c1c !important;
     color: white;
 }
+
 .sidebar a {
     display: block;
     color: white;
@@ -162,6 +165,68 @@ body {
     margin-bottom: 10px;
 }
 
+.btn-filter {
+    background: #1d4ed8;
+    color: white;
+    padding: 20px;
+    border: none;
+    border-radius: 10px;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+
+.btn-filter:hover {
+    background: #0d3b66;
+}
+
+.tooltip {
+    position: relative;
+}
+
+/* message hidden */
+.tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+
+    background: #111;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+
+    transition: 0.3s;
+}
+
+/* petit arrow */
+.tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: #111 transparent transparent transparent;
+}
+
+/* hover effect */
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
 .titre {
     width: 100%;
     justify-content: center;
@@ -177,7 +242,6 @@ body {
 /* input recherche */
 .recherhe input {
     flex: 1;
-    min-width: 250px;
     padding: 10px 13px;
     border: none;
     border-radius: 10px;
@@ -526,14 +590,15 @@ table tr:hover {
     }
 
     /* TABLE scroll */
-   table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 800px; /* manery scroll rehefa petit écran */
-}
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 800px;
+        /* manery scroll rehefa petit écran */
+    }
 
-.table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-}
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
 }

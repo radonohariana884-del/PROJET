@@ -20,13 +20,25 @@ $user = $req->fetch(PDO::FETCH_ASSOC);
 
 /* ADMIN ONLY */
 if ($_SESSION["role"] == "admin") {
-
     if (isset($_GET['delete'])) {
-        $sql = "DELETE FROM utilisateurs WHERE id = :id";
-        $req = $pdo->prepare($sql);
-        $req->execute([':id' => $_GET['delete']]);
-        header("Location: Utilisateur.php");
-        exit();
+
+        $idDelete = $_GET['delete'];
+
+        try {
+
+            $sql = "DELETE FROM utilisateurs WHERE id = :id";
+            $req = $pdo->prepare($sql);
+
+            $req->execute([
+                ':id' => $idDelete
+            ]);
+
+            header("Location: Parametre.php");
+            exit();
+        } catch (PDOException $e) {
+
+            echo "Erreur suppression : " . $e->getMessage();
+        }
     }
 
     $edit = false;
@@ -56,19 +68,48 @@ if ($_SESSION["role"] == "admin") {
     }
 
     if (isset($_POST['Modifier'])) {
-        $sql = "UPDATE utilisateurs SET nom=:nom,email=:email,role=:role WHERE id=:id";
-        $req = $pdo->prepare($sql);
-        $req->execute([
-            ':nom' => $_POST['nom'],
-            ':email' => $_POST['email'],
-            ':role' => $_POST['role'],
-            ':id' => $_POST['id']
-        ]);
+
+        // Raha misy mot de passe vaovao
+        if (!empty($_POST['mot_de_passe'])) {
+
+            $sql = "UPDATE utilisateurs 
+                SET nom=:nom,
+                    email=:email,
+                    mot_de_passe=:mot_de_passe,
+                    role=:role
+                WHERE id=:id";
+
+            $req = $pdo->prepare($sql);
+
+            $req->execute([
+                ':nom' => $_POST['nom'],
+                ':email' => $_POST['email'],
+                ':mot_de_passe' => password_hash($_POST['mot_de_passe'], PASSWORD_DEFAULT),
+                ':role' => $_POST['role'],
+                ':id' => $_POST['id']
+            ]);
+        } else {
+
+            // Raha tsy ovaina ny mot de passe
+            $sql = "UPDATE utilisateurs 
+                SET nom=:nom,
+                    email=:email,
+                    role=:role
+                WHERE id=:id";
+
+            $req = $pdo->prepare($sql);
+
+            $req->execute([
+                ':nom' => $_POST['nom'],
+                ':email' => $_POST['email'],
+                ':role' => $_POST['role'],
+                ':id' => $_POST['id']
+            ]);
+        }
 
         header("Location: Utilisateur.php");
         exit();
     }
-
     $users = $pdo->query("SELECT * FROM utilisateurs")->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
@@ -206,18 +247,36 @@ if ($_SESSION["role"] == "admin") {
             border-bottom: 1px solid #ddd;
         }
 
-        /* ACTION */
-        a {
+        /* ACTION BUTTONS */
+        .action-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit-btn {
+            background: #22c55e;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
             text-decoration: none;
-            margin: 5px;
+            font-size: 14px;
         }
 
-        .edit {
-            color: green;
+        .edit-btn:hover {
+            background: #16a34a;
         }
 
-        .delete {
-            color: red;
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
         }
 
         /* RESPONSIVE MOBILE */
@@ -346,9 +405,19 @@ if ($_SESSION["role"] == "admin") {
                                 <td><?= $u['nom'] ?></td>
                                 <td><?= $u['email'] ?></td>
                                 <td><?= $u['role'] ?></td>
-                                <td>
-                                    <a class="edit" href="Utilisateur.php?edit=<?= $u['id'] ?>">Modifier</a>
-                                    <a class="delete" href="Utilisateur.php?delete=<?= $u['id'] ?>" onclick="return confirm('Supprimer ?')">Supprimer</a>
+                                <td class="action-btns">
+
+                                    <a class="edit-btn"
+                                        href="Parametre.php?edit=<?= $u['id'] ?>">
+                                        Modifier
+                                    </a>
+
+                                    <a class="delete-btn"
+                                        href="Parametre.php?delete=<?= $u['id'] ?>"
+                                        onclick="return confirm('Supprimer cet utilisateur ?')">
+                                        Supprimer
+                                    </a>
+
                                 </td>
                             </tr>
                         <?php } ?>

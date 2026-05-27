@@ -113,43 +113,127 @@ if (isset($_POST["Modifier"])) {
     header("Location: Etudiant.php");
 }
 
-// recherche
-$motcle = $_GET['search'] ?? '';
+/* =========================
+   RECHERCHE + FILTRE + TRI
+========================= */
 
-if (!empty($motcle)) {
-    $Sql3 = "SELECT e.IM,e.Nom,e.Prenom,e.DateNaiss,e.Sexe,e.LieuNaiss,e.CIN,e.Email,e.Phone,e.Mention,
-     n.Nom_niv,n.Montant_paye,
-     COALESCE (SUM(p.Montant_total),0) AS total_paye,
-     (n.Montant_paye - COALESCE (SUM(p.Montant_total),0))AS Reste,
-     CASE
+$search  = $_GET['search'] ?? '';
+$sexe    = $_GET['sexe'] ?? 'all';
+$niveau  = $_GET['niveau'] ?? 'all';
+$mention = $_GET['mention'] ?? 'all';
+$statut  = $_GET['statut'] ?? 'all';
+$tri     = $_GET['tri'] ?? '';
 
+$sql = "SELECT 
+
+e.IM,
+e.Nom,
+e.Prenom,
+e.DateNaiss,
+e.Sexe,
+e.LieuNaiss,
+e.CIN,
+e.Phone,
+e.Mention,
+
+n.Nom_niv,
+n.Montant_paye,
+
+COALESCE(SUM(p.Montant_total),0) AS total_paye,
+
+(n.Montant_paye - COALESCE(SUM(p.Montant_total),0)) AS Reste,
+
+CASE
 WHEN COALESCE(SUM(p.Montant_total),0) = 0
 THEN 'Non payé'
 
 WHEN COALESCE(SUM(p.Montant_total),0) < n.Montant_paye
 THEN 'Partiel'
 
-WHEN COALESCE(SUM(p.Montant_total),0) >= n.Montant_paye
-THEN 'Payé'
-
+ELSE 'Payé'
 END AS Statut
 
-     FROM etudiant e 
-     JOIN niveau n ON e.Id_niv=n.Id_niv 
-    LEFT JOIN payement p ON e.IM=p.IM 
-    WHERE e.Nom LIKE :motcle
-    OR e.Prenom LIKE :motcle
-    OR e.IM LIKE :motcle
-   GROUP BY e.IM
-    
-    ";
+FROM etudiant e
 
-    $requete = $pdo->prepare($Sql3);
-    $requete->execute([
-        'motcle' => "%$motcle%"
-    ]);
-    $resultats = $requete->fetchAll();
+JOIN niveau n
+ON e.Id_niv = n.Id_niv
+
+LEFT JOIN payement p
+ON e.IM = p.IM
+
+WHERE 1=1
+";
+
+$params = [];
+
+/* SEARCH */
+if ($search != '') {
+
+    $sql .= " AND (
+        e.Nom LIKE :search
+        OR e.Prenom LIKE :search
+        OR e.IM LIKE :search
+    )";
+
+    $params[':search'] = "%$search%";
 }
+
+/* FILTRE SEXE */
+if ($sexe != 'all') {
+
+    $sql .= " AND e.Sexe = :sexe";
+
+    $params[':sexe'] = $sexe;
+}
+
+/* FILTRE NIVEAU */
+if ($niveau != 'all') {
+
+    $sql .= " AND n.Nom_niv = :niveau";
+
+    $params[':niveau'] = $niveau;
+}
+
+/* FILTRE MENTION */
+if ($mention != 'all') {
+
+    $sql .= " AND e.Mention = :mention";
+
+    $params[':mention'] = $mention;
+}
+
+/* GROUP BY */
+$sql .= " GROUP BY e.IM ";
+
+/* FILTRE STATUT */
+if ($statut == 'Payé') {
+
+    $sql .= " HAVING total_paye >= n.Montant_paye ";
+} elseif ($statut == 'Partiel') {
+
+    $sql .= " HAVING total_paye > 0
+              AND total_paye < n.Montant_paye ";
+} elseif ($statut == 'Non payé') {
+
+    $sql .= " HAVING total_paye = 0 ";
+}
+
+/* TRI */
+if ($tri == 'alpha') {
+
+    $sql .= " ORDER BY e.Nom ASC ";
+} elseif ($tri == 'im') {
+
+    $sql .= " ORDER BY e.IM ASC ";
+} elseif ($tri == 'age') {
+
+    $sql .= " ORDER BY e.DateNaiss DESC ";
+}
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+
+$Etudiant = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $tri = $_GET['tri'] ?? '';
 
@@ -307,12 +391,9 @@ if (!empty($resultats) && isset($resultats)) {
             <a href="Payement.php">
                 <i class="fa-solid fa-money-bill-transfer"></i> Paiement
             </a>
-            <?php if ($_SESSION["role"] == "admin") { ?>
-
-                <a href="Utilisateur.php">
-                    <i class="fa-solid fa-users-gear"></i> Utilisateurs
-                </a>
-            <?php } ?>
+            <a href="Utilisateur.php">
+                <i class="fa-solid fa-users-gear"></i> Utilisateurs
+            </a>
             <a class="btn-logout-bottom" href="logout.php" onclick="return confirm('Se déconnecter ?')">
                 <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
             </a>
@@ -534,7 +615,7 @@ if (!empty($resultats) && isset($resultats)) {
 
             <!-- TRI -->
             <div class="tri-box">
-                <select name="tri" onchange="this.form.submit()">
+                <select id="fTri" name="tri">
                     <option value="">Trier par</option>
                     <option value="alpha">Par ordre alphabétique</option>
                     <option value="im">Par IM</option>
@@ -545,13 +626,13 @@ if (!empty($resultats) && isset($resultats)) {
             <!-- FILTRE -->
             <div class="filter-box">
 
-                <select id="fSexe" name="sexe" onchange="this.form.submit()">
+                <select id="fSexe" name="sexe">
                     <option value="all">Sexe</option>
                     <option value="M">Homme</option>
                     <option value="F">Femme</option>
                 </select>
 
-                <select id="fNiveau" name="niveau" onchange="this.form.submit()">
+                <select id="fNiveau" name="niveau">
                     <option value="all">Niveau</option>
                     <option value="L1">L1</option>
                     <option value="L2">L2</option>
@@ -560,19 +641,23 @@ if (!empty($resultats) && isset($resultats)) {
                     <option value="M2">M2</option>
                 </select>
 
-                <select id="fMention" name="mention" onchange="this.form.submit()">
+                <select id="fMention" name="mention">
                     <option value="all">Mention</option>
                     <option value="DAII">DAII</option>
                     <option value="ICM">ICM</option>
                     <option value="AES">AES</option>
                 </select>
 
-                <select id="fStatut" name="statut" onchange="this.form.submit()">
+                <select id="fStatut" name="statut">
                     <option value="all">Statut</option>
                     <option value="Payé">Payé</option>
                     <option value="Partiel">Partiel</option>
                     <option value="Non payé">Non payé</option>
                 </select>
+                <button type="submit" class="btn-filter tooltip">
+                    <i class="fa-solid fa-filter"></i>
+                    <span class="tooltip-text">Filtrer</span>
+                </button>
                 <a href="impression-etudiant.php?sexe=<?= $_GET['sexe'] ?? 'all' ?>&niveau=<?= $_GET['niveau'] ?? 'all' ?>&mention=<?= $_GET['mention'] ?? 'all' ?>"
                     target="_blank"
                     class="btn-print">
